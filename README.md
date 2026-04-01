@@ -1,8 +1,5 @@
 # Lớp `People` - Quản lý quan hệ huyết thống và điều kiện kết hôn
 
-Dưới đây là toàn bộ code lớp `People` trong namespace `HomeWork`.  
-Bạn có thể xem xét trực tiếp logic và các hàm liên quan đến quản lý quan hệ gia đình, tìm tổ tiên chung và kiểm tra điều kiện kết hôn hợp lệ.
-
 ```csharp
 namespace HomeWork
 {
