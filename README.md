@@ -10,9 +10,10 @@ namespace HomeWork
         public People? Parent { get; set; }
         public List<People> Children { get; set; } = new List<People>();
 
-        public People(string name)
+        public People(string name, string gender)
         {
             Name = name;
+            Gender = gender;
         }
 
         public void AddChild(People child)
