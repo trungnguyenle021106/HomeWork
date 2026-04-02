@@ -1,7 +1,5 @@
 # Unit Tests cho lớp `People` trong namespace `HomeWork.Way1`
 
-Dưới đây là các bài kiểm thử (unit tests) được viết bằng `XUnit` để kiểm tra chức năng liên quan đến quan hệ huyết thống và điều kiện kết hôn giữa các đối tượng `People`.
-
 ```csharp
 using HomeWork.Way1;
 using Xunit;
