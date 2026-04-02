@@ -1,5 +1,4 @@
-# Lớp `People` - Quản lý quan hệ huyết thống và điều kiện kết hôn
-
+```csharp
 namespace HomeWork.Way1
 {
     public class People
@@ -149,7 +148,5 @@ namespace HomeWork.Way1
             return true;
 
         }
-
     }
-
 }
