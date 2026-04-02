@@ -1,6 +1,5 @@
 # Lớp `People` - Quản lý quan hệ huyết thống và điều kiện kết hôn
 
-```csharp
 namespace HomeWork.Way1
 {
     public class People
@@ -10,7 +9,7 @@ namespace HomeWork.Way1
         public string Name { get; set; }
         public People? Parent { get; set; }
         public List<People> Children { get; set; } = new List<People>();
-        private const int MAX_SEARCH_DEPTH = 4;
+        private const int MAX_SEARCH_DEPTH = 4; // Thiết lập độ sâu tối đa ưu tiên chỉ kiểm tra 3 đời có được cưới hay không
 
         public People(string name, string gender)
         {
@@ -52,7 +51,7 @@ namespace HomeWork.Way1
         public bool IsAncestorOf(People other)
         {
             People? current = other.Parent;
-            int deepth = 2;
+            int deepth = 1;
             while (current != null && deepth != MAX_SEARCH_DEPTH)
             {
                 if (current == this) return true;
@@ -63,10 +62,9 @@ namespace HomeWork.Way1
         }
 
         // 2. Tìm Tổ tiên chung gần nhất (Người có vai vế lớn hơn gần nhất) 
-
         public People? GetLowestCommonAncestor(People other)
         {
-            int deepth = 1;
+            int deepth = 0;
             var myAncestors = new HashSet<People>();
             People? current = this;
             // Lưu lại toàn bộ gốc gác của mình (bao gồm cả bản thân)
@@ -87,6 +85,7 @@ namespace HomeWork.Way1
             return null;
         }
 
+        // Xác định đời so với tổ tiên chung
         public int GetGenerationRelativeTo(People ancestor)
         {
             int distance = 1; // Tổ tiên chung tính là đời thứ 1
@@ -100,18 +99,21 @@ namespace HomeWork.Way1
             return -1; // Không cùng dòng họ với người này
         }
 
+        //Kiểm tra có phải cùng một người không
         public bool IsMySelf(People other)
         {
             if (Id == other.Id) return true;
             return false;
         }
 
+        // Kiểm tra giới tính hợp lệ để cưới
         public bool IsNotGenderValid(People other)
         {
             if (Gender == other.Gender) return true;
             return false;
         }
 
+        // Kiểm tra có nằm trong 3 đời cấm kết hôn không
         public bool IsWithinForbiddenGenerations(People other, People commonAncestor)
         {
             int myGen = GetGenerationRelativeTo(commonAncestor);
@@ -124,6 +126,7 @@ namespace HomeWork.Way1
             return false;
         }
 
+        // Kiểm tra có tổ tiên chung nào không
         public bool HasNotLowestCommonAncestor(People? ancestor)
         {
             if (ancestor == null) return true;
