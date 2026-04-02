@@ -1,14 +1,16 @@
 # Lớp `People` - Quản lý quan hệ huyết thống và điều kiện kết hôn
 
 ```csharp
-namespace HomeWork
+namespace HomeWork.Way1
 {
     public class People
     {
+        public string Id { get; set; } = Guid.NewGuid().ToString();
         public string Gender { get; set; }
         public string Name { get; set; }
         public People? Parent { get; set; }
         public List<People> Children { get; set; } = new List<People>();
+        private const int MAX_SEARCH_DEPTH = 4;
 
         public People(string name, string gender)
         {
@@ -24,46 +26,49 @@ namespace HomeWork
 
         public bool IsSameParent(People other)
         {
-            if (this.Parent == null || other.Parent == null) return false;
-            return this.Parent == other.Parent;
+            if (Parent == null || other.Parent == null) return false;
+            return Parent == other.Parent;
         }
 
         public bool IsSameGrandParent(People other)
         {
-            if (this.Parent?.Parent == null || other.Parent?.Parent == null) return false;
-            return this.Parent.Parent == other.Parent.Parent;
+            if (Parent?.Parent == null || other.Parent?.Parent == null) return false;
+            return Parent.Parent == other.Parent.Parent;
         }
 
         public bool IsSameGreatGrandParent(People other)
         {
-            if (this.Parent?.Parent?.Parent == null || other.Parent?.Parent?.Parent == null) return false;
-            return this.Parent.Parent.Parent == other.Parent.Parent.Parent;
+            if (Parent?.Parent?.Parent == null || other.Parent?.Parent?.Parent == null) return false;
+            return Parent.Parent.Parent == other.Parent.Parent.Parent;
         }
 
-        // 1. Kiểm tra có phải huyết thống trực hệ không (Cha mẹ - con cái, ông bà - cháu...)
+        // 1. Kiểm tra có phải huyết thống trực hệ không 
         public bool IsDirectBloodline(People other)
         {
-            return this.IsAncestorOf(other) || other.IsAncestorOf(this);
+            return IsAncestorOf(other) || other.IsAncestorOf(this);
         }
 
         // Kiểm tra xem mình có phải tổ tiên của người kia không
         public bool IsAncestorOf(People other)
         {
             People? current = other.Parent;
-            while (current != null)
+            int deepth = 2;
+            while (current != null && deepth != MAX_SEARCH_DEPTH)
             {
                 if (current == this) return true;
                 current = current.Parent;
+                deepth++;
             }
             return false;
         }
 
-        // 2. Tìm Tổ tiên chung gần nhất (Lowest Common Ancestor)
-        public People? GetCommonAncestor(People other)
+        // 2. Tìm Tổ tiên chung gần nhất (Người có vai vế lớn hơn gần nhất) 
+
+        public People? GetLowestCommonAncestor(People other)
         {
+            int deepth = 1;
             var myAncestors = new HashSet<People>();
             People? current = this;
-
             // Lưu lại toàn bộ gốc gác của mình (bao gồm cả bản thân)
             while (current != null)
             {
@@ -73,15 +78,12 @@ namespace HomeWork
 
             // Duyệt từ người kia lên, ai trùng đầu tiên thì đó là tổ tiên chung gần nhất
             current = other;
-            while (current != null)
+            while (current != null && deepth != MAX_SEARCH_DEPTH)
             {
-                if (myAncestors.Contains(current))
-                {
-                    return current;
-                }
+                if (myAncestors.Contains(current)) return current;
                 current = current.Parent;
+                deepth++;
             }
-
             return null;
         }
 
@@ -98,48 +100,53 @@ namespace HomeWork
             return -1; // Không cùng dòng họ với người này
         }
 
-        // 4. Kiểm tra điều kiện kết hôn
-        public bool CanMarry(People other)
+        public bool IsMySelf(People other)
         {
-            if (this == other) return false;
-
-            if (this.Gender == other.Gender) return false;
-
-            // Không được cưới người trực hệ (cha mẹ, ông bà, con cháu...)
-            if (IsDirectBloodline(other)) return false;
-
-            // Tìm tổ tiên chung
-            People? commonAncestor = GetCommonAncestor(other);
-
-            // Nếu không có tổ tiên chung -> Không cùng huyết thống -> Được cưới
-            if (commonAncestor == null) return true;
-
-            // Tính số đời của cả 2 so với tổ tiên chung
-            int myGen = this.GetGenerationRelativeTo(commonAncestor);
-            int otherGen = other.GetGenerationRelativeTo(commonAncestor);
-
-            // Cấm kết hôn nếu cả 2 người đều thuộc phạm vi 3 đời
-            if (myGen <= 3 && otherGen <= 3)
-            {
-                return false;
-            }
-
-            return true;
+            if (Id == other.Id) return true;
+            return false;
         }
 
-        public string GetRelationshipInfo(People other)
+        public bool IsNotGenderValid(People other)
         {
-            if (this == other) return $"{this.Name} là chính mình.";
-            if (IsDirectBloodline(other)) return $"{this.Name} và {other.Name} là họ hàng trực hệ.";
+            if (Gender == other.Gender) return true;
+            return false;
+        }
 
-            People? commonAncestor = GetCommonAncestor(other);
-            if (commonAncestor == null) return $"{this.Name} và {other.Name} không có quan hệ huyết thống.";
-
+        public bool IsWithinForbiddenGenerations(People other, People commonAncestor)
+        {
             int myGen = GetGenerationRelativeTo(commonAncestor);
             int otherGen = other.GetGenerationRelativeTo(commonAncestor);
 
-            string status = CanMarry(other) ? "ĐƯỢC PHÉP cưới" : "KHÔNG ĐƯỢC cưới";
-            return $"Tổ tiên chung là: {commonAncestor.Name}. {this.Name} (Đời {myGen}) - {other.Name} (Đời {otherGen}) -> {status}.";
+            if (myGen <= 3 && otherGen <= 3)
+            {
+                return true;
+            }
+            return false;
         }
+
+        public bool HasNotLowestCommonAncestor(People? ancestor)
+        {
+            if (ancestor == null) return true;
+            return false;
+        }
+
+        public bool CanMarry(People other)
+        {
+            // Nếu là cùng một người thì không được phép kết hôn
+            if (IsMySelf(other)) return false;
+            // Nếu cùng giới tính thì không được phép kết hôn
+            if (IsNotGenderValid(other)) return false;
+            // Nếu là huyết thống trực hệ thì không được phép kết hôn
+            if (IsDirectBloodline(other)) return false;
+            People? commonAncestor = GetLowestCommonAncestor(other);
+            // Nếu không có tổ tiên chung (người có vai vế lớn hơn gần nhất) nào thì có thể kết hôn
+            if (HasNotLowestCommonAncestor(commonAncestor)) return true;
+            // Nếu có tổ tiên chung (người có vai vế lớn hơn gần nhất) nhưng không nằm trong 3 đời thì có thể kết hôn
+            if (IsWithinForbiddenGenerations(other, commonAncestor)) return false;
+            return true;
+
+        }
+
     }
+
 }
